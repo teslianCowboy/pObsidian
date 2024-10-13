@@ -17,7 +17,6 @@ export default class PobsidianPlugin extends Plugin {
     terminalLeaf: WorkspaceLeaf | null = null;
 	session: any; // Tau Prolog session
 
-
     async onload() {
         this.loadSettings();
 
@@ -35,30 +34,25 @@ export default class PobsidianPlugin extends Plugin {
         this.addSettingTab(new PobsidianSettingTab(this.app, this));
 
         // Initialize leaves on startup
-        this.app.workspace.onLayoutReady(() => {
+        this.app.workspace.onLayoutReady(async () => {
             this.initLeaves();
             this.initProlog();
-        //    this.queryProlog('initTerminalLeaf.');
 
         });
 
     }
 
-    private initProlog(){
+   async initProlog(){
 		this.session = pl.create();
-		this.consultPrologFile('terminalLeaf.pl');
+		await this.initPrologSession();
 	}
 
-	consultPrologFile(filename: string){
+	async initPrologSession(){
 		try {
 			const pluginDir = this.manifest.dir ?? '';
 			if (!pluginDir) {
 			  throw new Error("Plugin directory is undefined");
 			}
-	  
-			console.log('Filename: '+filename);
-			const filePath = `${pluginDir}/${filename}`;
-			console.log('filePath: '+filePath);
 
 			const program =   `
 			:- use_module(library(dom)).
@@ -67,14 +61,16 @@ export default class PobsidianPlugin extends Plugin {
                 get_by_class('pTerminal', Input),
                 html(Input, '<p>lol<p>').
 
-			`//this.readPrologFile(filePath);
+			`;
 
-			this.session.consult(program, {
+            const program2 = await this.readPrologFile(pluginDir + '/terminalLeaf.pl');
+
+			this.session.consult(program2, {
 			  success: () => {
-				console.log("Program loaded successfully:" + program);
-                this.queryProlog('initTerminalLeaf.')
+				console.log("Program loaded successfully:\n" + program2);
+                this.queryProlog('initTerminalLeaf.');
 			  },
-			  error: (err: any) => { console.log("Error loading program: " + err) }
+			  error: (err: any) => { console.log("Error loading program: " + err + " " + program2) }
 			});
 		  } catch (error) {
 			console.error("Error reading Prolog file:", error);
@@ -85,7 +81,7 @@ export default class PobsidianPlugin extends Plugin {
 	queryProlog(query: string) {
 		console.log("Query: " + query);
 		this.session.query(query, {
-		  success: (goal: any) => {
+		  success: (_goal: any) => {
 			console.log("Ruff!");
 			this.session.answer((answer: any) => {
 			  console.log("Answer: " + pl.format_answer(answer));
@@ -143,7 +139,9 @@ export default class PobsidianPlugin extends Plugin {
 		const adapter = this.app.vault.adapter;
 		const exists = await adapter.exists(filename);
 		if (exists) {
-		  return await adapter.read(filename);
+            const str = await adapter.read(filename)
+        //  console.log('File exists: '+str);
+		  return str;
 		} else {
 		  throw new Error(`File not found: ${filename}`);
 		}
