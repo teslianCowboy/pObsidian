@@ -1,134 +1,221 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Plugin, PluginSettingTab, WorkspaceLeaf, ItemView, TFile, Notice } from 'obsidian';
+import * as pl from 'tau-prolog';
+require("tau-prolog/modules/js.js")(pl);
+require("tau-prolog/modules/dom.js")(pl);
 
-// Remember to rename these classes and interfaces!
-
-interface MyPluginSettings {
-	mySetting: string;
+interface PobsidianSettings {
+    // Add your settings here
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: PobsidianSettings = {
+    // Set default values for your settings
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class PobsidianPlugin extends Plugin {
+    settings: PobsidianSettings;
+    controlLeaf: WorkspaceLeaf | null = null;
+    terminalLeaf: WorkspaceLeaf | null = null;
+	session: any; // Tau Prolog session
 
-	async onload() {
-		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+    async onload() {
+        this.loadSettings();
 
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+        // Add ribbon icon
+        this.addRibbonIcon('sigma', 'pObsidian', (evt: MouseEvent) => {
+			this.initLeaves();
+            this.activateView();
+        });
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
+        // Register views
+        this.registerView('pobsidian-control', (leaf) => new ControlView(leaf));
+        this.registerView('pobsidian-terminal', (leaf) => new TerminalView(leaf));
+
+        // Add settings tab
+        this.addSettingTab(new PobsidianSettingTab(this.app, this));
+
+        // Initialize leaves on startup
+        this.app.workspace.onLayoutReady(() => {
+            this.initLeaves();
+            this.initProlog();
+        //    this.queryProlog('initTerminalLeaf.');
+
+        });
+
+    }
+
+    private initProlog(){
+		this.session = pl.create();
+		this.consultPrologFile('terminalLeaf.pl');
+	}
+
+	consultPrologFile(filename: string){
+		try {
+			const pluginDir = this.manifest.dir ?? '';
+			if (!pluginDir) {
+			  throw new Error("Plugin directory is undefined");
 			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
+	  
+			console.log('Filename: '+filename);
+			const filePath = `${pluginDir}/${filename}`;
+			console.log('filePath: '+filePath);
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-			}
-		});
+			const program =   `
+			:- use_module(library(dom)).
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+            initTerminalLeaf :-
+                get_by_class('pTerminal', Input),
+                html(Input, '<p>lol<p>').
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
+			`//this.readPrologFile(filePath);
 
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-	}
-
-	onunload() {
+			this.session.consult(program, {
+			  success: () => {
+				console.log("Program loaded successfully:" + program);
+                this.queryProlog('initTerminalLeaf.')
+			  },
+			  error: (err: any) => { console.log("Error loading program: " + err) }
+			});
+		  } catch (error) {
+			console.error("Error reading Prolog file:", error);
+		  }
 
 	}
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
+	queryProlog(query: string) {
+		console.log("Query: " + query);
+		this.session.query(query, {
+		  success: (goal: any) => {
+			console.log("Ruff!");
+			this.session.answer((answer: any) => {
+			  console.log("Answer: " + pl.format_answer(answer));
+			});
+		  },
+		  error: (err: any) => { console.log("Error parsing goal: " + err) }
+		});
+	  }
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+    async loadSettings() {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    async saveSettings() {
+        await this.saveData(this.settings);
+    }
+
+    initLeaves() {
+        const controlLeaves = this.app.workspace.getLeavesOfType('pobsidian-control');
+        this.controlLeaf = controlLeaves.length > 0 ? controlLeaves[0] : null;
+
+        const terminalLeaves = this.app.workspace.getLeavesOfType('pobsidian-terminal');
+        this.terminalLeaf = terminalLeaves.length > 0 ? terminalLeaves[0] : null;
+    }
+
+    async ensureLeafCreated(side: 'left' | 'right'): Promise<void> {
+        if (side === 'left' && !this.controlLeaf) {
+            const leaf = this.app.workspace.getLeftLeaf(false);
+            if (leaf) {
+                this.controlLeaf = leaf;
+                await this.controlLeaf.setViewState({ type: 'pobsidian-control', active: true });
+            }
+        } else if (side === 'right' && !this.terminalLeaf) {
+            const leaf = this.app.workspace.getRightLeaf(false);
+            if (leaf) {
+                this.terminalLeaf = leaf;
+                await this.terminalLeaf.setViewState({ type: 'pobsidian-terminal', active: true });
+            }
+        }
+    }
+
+    async activateView() {
+        await this.ensureLeafCreated('left');
+        await this.ensureLeafCreated('right');
+
+        if (this.controlLeaf) {
+            this.app.workspace.revealLeaf(this.controlLeaf);
+        }
+        if (this.terminalLeaf) {
+            this.app.workspace.revealLeaf(this.terminalLeaf);
+        }
+    }
+
+	async readPrologFile(filename: string): Promise<string> {
+		const adapter = this.app.vault.adapter;
+		const exists = await adapter.exists(filename);
+		if (exists) {
+		  return await adapter.read(filename);
+		} else {
+		  throw new Error(`File not found: ${filename}`);
+		}
+	  }
+
+    onunload() {
+        // Clean up leaves if needed
+    }
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+class ControlView extends ItemView {
+    constructor(leaf: WorkspaceLeaf) {
+        super(leaf);
+		this.containerEl.addClass('pControl');
+    }
 
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
+    getViewType() {
+        return 'pobsidian-control';
+    }
 
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
+    getDisplayText() {
+        return 'pObsidian Control';
+    }
+
+    async onOpen() {
+        const container = this.containerEl.children[1];
+        container.empty();
+        container.createEl('h4', { text: 'Pobsidian Control' });
+    }
+
+    async onClose() {
+        // Clean up
+    }
 }
 
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+class TerminalView extends ItemView {
+    constructor(leaf: WorkspaceLeaf) {
+        super(leaf);
+		this.containerEl.addClass('pTerminal');
+    }
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+    getViewType() {
+        return 'pobsidian-terminal';
+    }
 
-	display(): void {
-		const {containerEl} = this;
+    getDisplayText() {
+        return 'Pobsidian Terminal';
+    }
 
-		containerEl.empty();
+    async onOpen() {
+        const container = this.containerEl.children[1];
+        container.empty();
+        container.createEl('h4', { text: 'Pobsidian Terminal' });
+    }
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+    async onClose() {
+        // Clean up
+    }
+}
+
+class PobsidianSettingTab extends PluginSettingTab {
+    plugin: PobsidianPlugin;
+
+    constructor(app: App, plugin: PobsidianPlugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
+
+    display(): void {
+        const { containerEl } = this;
+        containerEl.empty();
+        containerEl.createEl('h2', { text: 'Pobsidian Settings' });
+        // Add your settings here
+    }
 }

@@ -1,0 +1,31 @@
+app.js:1 Obsidian Developer Console
+plugin:sample-plugin:81 Filename: terminalLeaf.pl
+plugin:sample-plugin:81 filePath: .obsidian/plugins/pObsidian/terminalLeaf.pl
+plugin:sample-plugin:81 Error reading file: Error: ENOENT: no such file or directory, open 'C:\Program Files\Obsidian\.obsidian\plugins\pObsidian\terminalLeaf.pl'
+readFileToString @ plugin:sample-plugin:81
+consultPrologFile @ plugin:sample-plugin:81
+initProlog @ plugin:sample-plugin:81
+eval @ plugin:sample-plugin:81
+plugin:sample-plugin:81 Error reading Prolog file: Error: Failed to read file: .obsidian/plugins/pObsidian/terminalLeaf.pl
+    at Ve.readFileToString (plugin:sample-plugin:81:4859)
+    at Ve.consultPrologFile (plugin:sample-plugin:81:3250)
+    at Ve.initProlog (plugin:sample-plugin:81:3724)
+    at HTMLDivElement.eval (plugin:sample-plugin:81:2820)
+consultPrologFile @ plugin:sample-plugin:81
+initProlog @ plugin:sample-plugin:81
+eval @ plugin:sample-plugin:81
+plugin:sample-plugin:81 Filename: terminalLeaf.pl
+plugin:sample-plugin:81 filePath: .obsidian/plugins/pObsidian/terminalLeaf.pl
+plugin:sample-plugin:81 Error reading file: Error: ENOENT: no such file or directory, open 'C:\Program Files\Obsidian\.obsidian\plugins\pObsidian\terminalLeaf.pl'
+readFileToString @ plugin:sample-plugin:81
+consultPrologFile @ plugin:sample-plugin:81
+initProlog @ plugin:sample-plugin:81
+eval @ plugin:sample-plugin:81
+plugin:sample-plugin:81 Error reading Prolog file: Error: Failed to read file: .obsidian/plugins/pObsidian/terminalLeaf.pl
+    at Ve.readFileToString (plugin:sample-plugin:81:4859)
+    at Ve.consultPrologFile (plugin:sample-plugin:81:3250)
+    at Ve.initProlog (plugin:sample-plugin:81:3724)
+    at HTMLDivElement.eval (plugin:sample-plugin:81:2820)
+consultPrologFile @ plugin:sample-plugin:81
+initProlog @ plugin:sample-plugin:81
+eval @ plugin:sample-plugin:81

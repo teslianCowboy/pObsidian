@@ -1,11 +1,12 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "pObsidian",
+	"name": "pObsidian",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "A (Tau) Prolog Interpreter for Obsidian.MD.",
+	"author": "Liam Wayne",
+	"authorUrl": "null",
+	"fundingUrl": "null",
+	"isDesktopOnly": false,
+	"css": "styles.css"
 }
