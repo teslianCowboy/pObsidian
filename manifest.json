@@ -1,7 +1,7 @@
 {
 	"id": "pObsidian",
 	"name": "pObsidian",
-	"version": "0.0.1",
+	"version": "0.0.27",
 	"minAppVersion": "0.15.0",
 	"description": "A (Tau) Prolog Interpreter for Obsidian.MD.",
 	"author": "Liam Wayne",

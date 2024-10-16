@@ -1,6 +1,8 @@
 import { App, Plugin, PluginSettingTab, WorkspaceLeaf, ItemView, TFile, Notice } from 'obsidian';
 import * as pl from 'tau-prolog';
+import TerminalView from './terminalLeaf';
 require("tau-prolog/modules/js.js")(pl);
+require("tau-prolog/modules/lists.js")(pl);
 require("tau-prolog/modules/dom.js")(pl);
 
 interface PobsidianSettings {
@@ -16,14 +18,17 @@ export default class PobsidianPlugin extends Plugin {
     controlLeaf: WorkspaceLeaf | null = null;
     terminalLeaf: WorkspaceLeaf | null = null;
 	session: any; // Tau Prolog session
+    program2: string = ''
 
     async onload() {
         this.loadSettings();
 
+
         // Add ribbon icon
-        this.addRibbonIcon('sigma', 'pObsidian', (evt: MouseEvent) => {
+        this.addRibbonIcon('sigma', 'pObsidian', async (evt: MouseEvent) => {
 			this.initLeaves();
             this.activateView();
+            this.reconsultProlog();
         });
 
         // Register views
@@ -49,28 +54,14 @@ export default class PobsidianPlugin extends Plugin {
 
 	async initPrologSession(){
 		try {
-			const pluginDir = this.manifest.dir ?? '';
-			if (!pluginDir) {
-			  throw new Error("Plugin directory is undefined");
-			}
+			this.program2 = await this.readPrologFile('/terminalLeaf.pl');
 
-			const program =   `
-			:- use_module(library(dom)).
-
-            initTerminalLeaf :-
-                get_by_class('pTerminal', Input),
-                html(Input, '<p>lol<p>').
-
-			`;
-
-            const program2 = await this.readPrologFile(pluginDir + '/terminalLeaf.pl');
-
-			this.session.consult(program2, {
+			this.session.consult(this.program2, {
 			  success: () => {
-				console.log("Program loaded successfully:\n" + program2);
-                this.queryProlog('initTerminalLeaf.');
+				console.log("Program loaded successfully.");
+                this.queryProlog('doggo.');
 			  },
-			  error: (err: any) => { console.log("Error loading program: " + err + " " + program2) }
+			  error: (err: any) => { console.log("Error loading program: " + err + " " + this.program2) }
 			});
 		  } catch (error) {
 			console.error("Error reading Prolog file:", error);
@@ -78,7 +69,18 @@ export default class PobsidianPlugin extends Plugin {
 
 	}
 
-	queryProlog(query: string) {
+    async reconsultProlog(){
+        this.program2 = await this.readPrologFile('/terminalLeaf.pl');
+        this.session.consult(this.program2, {
+            success: () => {
+              console.log("Program loaded successfully.");
+              this.queryProlog('clear_window, doggo.');
+            },
+            error: (err: any) => { console.log("Error loading program: " + err + " " + this.program2) }
+          });
+        }
+
+	async queryProlog(query: string) {
 		console.log("Query: " + query);
 		this.session.query(query, {
 		  success: (_goal: any) => {
@@ -170,31 +172,6 @@ class ControlView extends ItemView {
         const container = this.containerEl.children[1];
         container.empty();
         container.createEl('h4', { text: 'Pobsidian Control' });
-    }
-
-    async onClose() {
-        // Clean up
-    }
-}
-
-class TerminalView extends ItemView {
-    constructor(leaf: WorkspaceLeaf) {
-        super(leaf);
-		this.containerEl.addClass('pTerminal');
-    }
-
-    getViewType() {
-        return 'pobsidian-terminal';
-    }
-
-    getDisplayText() {
-        return 'Pobsidian Terminal';
-    }
-
-    async onOpen() {
-        const container = this.containerEl.children[1];
-        container.empty();
-        container.createEl('h4', { text: 'Pobsidian Terminal' });
     }
 
     async onClose() {
