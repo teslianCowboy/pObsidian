@@ -16,7 +16,8 @@ const DEFAULT_SETTINGS: PobsidianSettings = {
 export default class PobsidianPlugin extends Plugin {
     settings: PobsidianSettings;
     controlLeaf: WorkspaceLeaf | null = null;
-    terminalLeaf: WorkspaceLeaf | null = null;
+    terminalLeaf: WorkspaceLeaf;
+    terminalView: TerminalView;
 	session: any; // Tau Prolog session
     program2: string = ''
 
@@ -28,12 +29,14 @@ export default class PobsidianPlugin extends Plugin {
         this.addRibbonIcon('sigma', 'pObsidian', async (evt: MouseEvent) => {
 			this.initLeaves();
             this.activateView();
-            this.reconsultProlog();
         });
 
         // Register views
         this.registerView('pobsidian-control', (leaf) => new ControlView(leaf));
-        this.registerView('pobsidian-terminal', (leaf) => new TerminalView(leaf));
+        this.registerView('pobsidian-terminal', (leaf) => {
+            this.terminalView = new TerminalView(leaf);
+            return this.terminalView;
+        });
 
         // Add settings tab
         this.addSettingTab(new PobsidianSettingTab(this.app, this));
@@ -42,7 +45,7 @@ export default class PobsidianPlugin extends Plugin {
         this.app.workspace.onLayoutReady(async () => {
             this.initLeaves();
             this.initProlog();
-
+            this.terminalView.initializeTerminal();
         });
 
     }
@@ -69,22 +72,11 @@ export default class PobsidianPlugin extends Plugin {
 
 	}
 
-    async reconsultProlog(){
-        this.program2 = await this.readPrologFile('/terminalLeaf.pl');
-        this.session.consult(this.program2, {
-            success: () => {
-              console.log("Program loaded successfully.");
-              this.queryProlog('clear_window, doggo.');
-            },
-            error: (err: any) => { console.log("Error loading program: " + err + " " + this.program2) }
-          });
-        }
-
 	async queryProlog(query: string) {
 		console.log("Query: " + query);
 		this.session.query(query, {
-		  success: (_goal: any) => {
-			console.log("Ruff!");
+		  success: (goal: any) => {
+			console.log(goal);
 			this.session.answer((answer: any) => {
 			  console.log("Answer: " + pl.format_answer(answer));
 			});
@@ -103,10 +95,10 @@ export default class PobsidianPlugin extends Plugin {
 
     initLeaves() {
         const controlLeaves = this.app.workspace.getLeavesOfType('pobsidian-control');
-        this.controlLeaf = controlLeaves.length > 0 ? controlLeaves[0] : null;
+        this.controlLeaf = controlLeaves[0];
 
         const terminalLeaves = this.app.workspace.getLeavesOfType('pobsidian-terminal');
-        this.terminalLeaf = terminalLeaves.length > 0 ? terminalLeaves[0] : null;
+        this.terminalLeaf = terminalLeaves[0];
     }
 
     async ensureLeafCreated(side: 'left' | 'right'): Promise<void> {

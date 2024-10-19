@@ -1,31 +1,64 @@
 app.js:1 Obsidian Developer Console
-plugin:sample-plugin:81 Filename: terminalLeaf.pl
-plugin:sample-plugin:81 filePath: .obsidian/plugins/pObsidian/terminalLeaf.pl
-plugin:sample-plugin:81 Error reading file: Error: ENOENT: no such file or directory, open 'C:\Program Files\Obsidian\.obsidian\plugins\pObsidian\terminalLeaf.pl'
-readFileToString @ plugin:sample-plugin:81
-consultPrologFile @ plugin:sample-plugin:81
-initProlog @ plugin:sample-plugin:81
-eval @ plugin:sample-plugin:81
-plugin:sample-plugin:81 Error reading Prolog file: Error: Failed to read file: .obsidian/plugins/pObsidian/terminalLeaf.pl
-    at Ve.readFileToString (plugin:sample-plugin:81:4859)
-    at Ve.consultPrologFile (plugin:sample-plugin:81:3250)
-    at Ve.initProlog (plugin:sample-plugin:81:3724)
-    at HTMLDivElement.eval (plugin:sample-plugin:81:2820)
-consultPrologFile @ plugin:sample-plugin:81
-initProlog @ plugin:sample-plugin:81
-eval @ plugin:sample-plugin:81
-plugin:sample-plugin:81 Filename: terminalLeaf.pl
-plugin:sample-plugin:81 filePath: .obsidian/plugins/pObsidian/terminalLeaf.pl
-plugin:sample-plugin:81 Error reading file: Error: ENOENT: no such file or directory, open 'C:\Program Files\Obsidian\.obsidian\plugins\pObsidian\terminalLeaf.pl'
-readFileToString @ plugin:sample-plugin:81
-consultPrologFile @ plugin:sample-plugin:81
-initProlog @ plugin:sample-plugin:81
-eval @ plugin:sample-plugin:81
-plugin:sample-plugin:81 Error reading Prolog file: Error: Failed to read file: .obsidian/plugins/pObsidian/terminalLeaf.pl
-    at Ve.readFileToString (plugin:sample-plugin:81:4859)
-    at Ve.consultPrologFile (plugin:sample-plugin:81:3250)
-    at Ve.initProlog (plugin:sample-plugin:81:3724)
-    at HTMLDivElement.eval (plugin:sample-plugin:81:2820)
-consultPrologFile @ plugin:sample-plugin:81
-initProlog @ plugin:sample-plugin:81
-eval @ plugin:sample-plugin:81
+plugin:pObsidian:118 Layout ready. Starting initialization sequence...
+plugin:pObsidian:118 Leaves initialized. Creating TerminalView...
+plugin:pObsidian:118 Initializing Prolog...
+plugin:pObsidian:118 Initializing Prolog session...
+plugin:pObsidian:118 Prolog initialized. Creating custom stream...
+plugin:pObsidian:118 Custom stream initialized.
+plugin:pObsidian:118 Prolog stream set up. Initializing terminal...
+plugin:pObsidian:118 Initializing terminal...
+plugin:pObsidian:118 Terminal initialized
+plugin:pObsidian:81 [Violation] Added non-passive event listener to a scroll-blocking 'wheel' event. Consider marking event handler as 'passive' to make the page more responsive. See https://www.chromestatus.com/feature/5745543795965952
+add @ plugin:pObsidian:81
+eval @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+Jr @ plugin:pObsidian:81
+on @ plugin:pObsidian:81
+eval @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+ae @ plugin:pObsidian:111
+$.fn.terminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+initializeTerminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+plugin:pObsidian:81 [Violation] Added non-passive event listener to a scroll-blocking 'touchstart' event. Consider marking event handler as 'passive' to make the page more responsive. See https://www.chromestatus.com/feature/5745543795965952
+add @ plugin:pObsidian:81
+eval @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+Jr @ plugin:pObsidian:81
+on @ plugin:pObsidian:81
+init @ plugin:pObsidian:84
+eval @ plugin:pObsidian:84
+each @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+eval @ plugin:pObsidian:84
+eval @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+ae @ plugin:pObsidian:111
+$.fn.terminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+initializeTerminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+plugin:pObsidian:81 [Violation] Added non-passive event listener to a scroll-blocking 'touchmove' event. Consider marking event handler as 'passive' to make the page more responsive. See https://www.chromestatus.com/feature/5745543795965952
+add @ plugin:pObsidian:81
+eval @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+Jr @ plugin:pObsidian:81
+on @ plugin:pObsidian:81
+init @ plugin:pObsidian:84
+eval @ plugin:pObsidian:84
+each @ plugin:pObsidian:81
+each @ plugin:pObsidian:81
+eval @ plugin:pObsidian:84
+eval @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+ae @ plugin:pObsidian:111
+$.fn.terminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+initializeTerminal @ plugin:pObsidian:118
+eval @ plugin:pObsidian:118
+plugin:pObsidian:118 Initialization sequence completed.
+plugin:pObsidian:118 Program loaded successfully.

@@ -1,0 +1,11 @@
+body{
+    margin: 0;
+    padding: 10px 10px;
+    width: 100%;
+    min-width: 550px;
+}
+
+textarea{
+    left: -1000px;
+    position: absolute;
+}
