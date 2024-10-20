@@ -1,6 +1,9 @@
 import { App, Plugin, PluginSettingTab, WorkspaceLeaf, ItemView, TFile, Notice } from 'obsidian';
 import * as pl from 'tau-prolog';
 import TerminalView from './terminalLeaf';
+import { Stream } from 'node:stream';
+var $ = require('jquery');
+require('jquery.terminal')($);
 require("tau-prolog/modules/js.js")(pl);
 require("tau-prolog/modules/lists.js")(pl);
 require("tau-prolog/modules/dom.js")(pl);
@@ -19,7 +22,9 @@ export default class PobsidianPlugin extends Plugin {
     terminalLeaf: WorkspaceLeaf;
     terminalView: TerminalView;
 	session: any; // Tau Prolog session
-    program2: string = ''
+    program2: string = '';
+    terminal: any;
+    customStream: any; 
 
     async onload() {
         this.loadSettings();
@@ -45,13 +50,21 @@ export default class PobsidianPlugin extends Plugin {
         this.app.workspace.onLayoutReady(async () => {
             this.initLeaves();
             this.initProlog();
-            this.terminalView.initializeTerminal();
         });
 
     }
 
+    getCustomStream() {
+        this.customStream = this.terminalView.createCustomStream();
+        console.log("Custom stream created:", this.customStream);
+        this.session.streams['terminal_output'] = this.customStream;
+        console.log(this.session.streams);
+    }
+
    async initProlog(){
+    console.log("Initializing Prolog...");
 		this.session = pl.create();
+        this.getCustomStream();
 		await this.initPrologSession();
 	}
 
@@ -62,7 +75,10 @@ export default class PobsidianPlugin extends Plugin {
 			this.session.consult(this.program2, {
 			  success: () => {
 				console.log("Program loaded successfully.");
-                this.queryProlog('doggo.');
+                this.createCustomPredicates(); // Add this line
+
+                this.session.query("setup_custom_stream.");
+                this.initializeTerminal();
 			  },
 			  error: (err: any) => { console.log("Error loading program: " + err + " " + this.program2) }
 			});
@@ -71,6 +87,40 @@ export default class PobsidianPlugin extends Plugin {
 		  }
 
 	}
+
+    createCustomPredicates() {
+        const self = this;
+        
+        // Add a custom 'echo' function to the global JavaScript context
+        (global as any).tauPrologEcho = function(x: any) {
+            if (self.terminal) {
+                self.terminal.echo(x.toString());
+            }
+            return null; // Assuming this should return a Prolog null
+        };
+    }
+
+    initializeTerminal() {
+        const self = this;
+        console.log('Initializing terminal...');
+        $(function() {
+            self.terminal = $('.pTerminal').terminal(
+                function(command: string) {
+                    try {
+                        let result = self.queryProlog(command);
+                        self.terminal.echo(result);
+                    } catch (e) {
+                        self.terminal.error(e instanceof Error ? e.message : String(e));
+                    }
+                }, {
+                    greetings: 'pObsidian Terminal',
+                    name: 'pObsidian',
+                    height: 500,
+                    prompt: '?- '
+                }
+            );
+        });
+    }
 
 	async queryProlog(query: string) {
 		console.log("Query: " + query);
