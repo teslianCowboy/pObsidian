@@ -1,7 +1,6 @@
 import { App, Plugin, PluginSettingTab, WorkspaceLeaf, ItemView, TFile, Notice } from 'obsidian';
 import * as pl from 'tau-prolog';
 import TerminalView from './terminalLeaf';
-import { Stream } from 'node:stream';
 var $ = require('jquery');
 require('jquery.terminal')($);
 require("tau-prolog/modules/js.js")(pl);
@@ -24,11 +23,9 @@ export default class PobsidianPlugin extends Plugin {
 	session: any; // Tau Prolog session
     program2: string = '';
     terminal: any;
-    customStream: any; 
 
     async onload() {
         this.loadSettings();
-
 
         // Add ribbon icon
         this.addRibbonIcon('sigma', 'pObsidian', async (evt: MouseEvent) => {
@@ -46,6 +43,9 @@ export default class PobsidianPlugin extends Plugin {
         // Add settings tab
         this.addSettingTab(new PobsidianSettingTab(this.app, this));
 
+        //Right-click Consult
+        this.registerFileMenuEvent();
+
         // Initialize leaves on startup
         this.app.workspace.onLayoutReady(async () => {
             this.initLeaves();
@@ -54,17 +54,9 @@ export default class PobsidianPlugin extends Plugin {
 
     }
 
-    getCustomStream() {
-        this.customStream = this.terminalView.createCustomStream();
-        console.log("Custom stream created:", this.customStream);
-        this.session.streams['terminal_output'] = this.customStream;
-        console.log(this.session.streams);
-    }
-
    async initProlog(){
     console.log("Initializing Prolog...");
 		this.session = pl.create();
-        this.getCustomStream();
 		await this.initPrologSession();
 	}
 
@@ -190,6 +182,58 @@ export default class PobsidianPlugin extends Plugin {
 		  throw new Error(`File not found: ${filename}`);
 		}
 	  }
+    
+      registerFileMenuEvent() {
+        this.registerEvent(
+            this.app.workspace.on("file-menu", (menu, file) => {
+                if (file instanceof TFile && file.extension === 'pl') {
+                    menu.addItem((item) => {
+                        item
+                            .setTitle("Consult Prolog file")
+                            .setIcon("sigma")
+                            .onClick(async () => {
+                                await this.consultPlFileFromVault(file);
+                            });
+                    });
+                }
+            })
+        );
+    }
+
+    async consultPlFileFromVault(file: TFile) {
+        try {
+            const content = await this.app.vault.read(file);
+            this.session.consult(content, {
+                success: () => {
+                    new Notice(`Successfully consulted ${file.name}`);
+                    console.log(`Program ${file.name} loaded successfully.`);
+                    if (this.terminal) {
+                        this.terminal.echo(`% Consulted ${file.name}`);
+                    }
+                },
+                error: (err: any) => {
+                    new Notice(`Error consulting ${file.name}: ${err}`);
+                    console.log(`Error loading program ${file.name}: ${err}`);
+                    if (this.terminal) {
+                        this.terminal.error(`% Error consulting ${file.name}: ${err}`);
+                    }
+                }
+            });
+        } catch (error) {
+            new Notice(`Error reading file ${file.name}`);
+            console.error(`Error reading Prolog file ${file.name}:`, error);
+            if (this.terminal) {
+                this.terminal.error(`% Error reading file ${file.name}`);
+            }
+        }
+    }
+
+    refreshPrologSession() {
+        // Reinitialize the session or perform any necessary cleanup
+        this.session = pl.create();
+        // Reconsult any base programs if needed
+        this.initPrologSession();
+    }
 
     onunload() {
         // Clean up leaves if needed
