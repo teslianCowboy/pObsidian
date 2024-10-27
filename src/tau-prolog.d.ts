@@ -9,6 +9,9 @@ declare module 'tau-prolog' {
 
     export namespace type {
         function is_substitution(answer: any): boolean;
+        class Term {
+            constructor(id: string, args: any[]);
+        }
     }
     
     export function format_answer(answer: any): string;

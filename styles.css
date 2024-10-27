@@ -1,3 +1,40 @@
-.xterm {
-    padding: 10px;
-  }
+/* Prolog syntax highlighting styles */
+.workspace-leaf-content[data-type="prolog-editor"] {
+  --prolog-comment-color: var(--text-faint);
+  --prolog-predicate-color: var(--text-accent);
+  --prolog-variable-color: var(--text-warning);
+  --prolog-operator-color: var(--text-muted);
+  --prolog-string-color: var(--text-success);
+  --prolog-atom-color: var(--text-normal);
+}
+
+.prolog-comment {
+  color: var(--prolog-comment-color);
+  font-style: italic;
+}
+
+.prolog-predicate {
+  color: var(--prolog-predicate-color);
+  font-weight: bold;
+}
+
+.prolog-variable {
+  color: var(--prolog-variable-color);
+}
+
+.prolog-operator {
+  color: var(--prolog-operator-color);
+  font-weight: bold;
+}
+
+.prolog-string {
+  color: var(--prolog-string-color);
+}
+
+.prolog-atom {
+  color: var(--prolog-atom-color);
+}
+
+.prolog-punctuation {
+  color: var(--text-muted);
+}
