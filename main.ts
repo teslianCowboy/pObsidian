@@ -84,7 +84,7 @@ export default class PobsidianPlugin extends Plugin {
 
 	async initPrologSession(){
 		try {
-			this.initTerminal = await this.readPrologFile('/terminalLeaf.pl');
+			this.initTerminal = await this.readPrologFile('_Framework/terminalLeaf.pl');
 
 			this.session.consult(this.initTerminal, {
 			  success: () => {
