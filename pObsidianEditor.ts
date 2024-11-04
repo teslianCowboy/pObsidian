@@ -39,7 +39,14 @@ export default function setupPrologEditor(plugin: Plugin) {
             "&.cm-editor.pl-file .cm-content": {
                 fontFamily: 'inherit',
                 fontSize: 'inherit',
-                lineHeight: 'inherit'
+                lineHeight: 'inherit',
+                spellcheck: 'false',
+                "-webkit-spell-check": 'false',
+                "word-spacing": "normal"
+            },
+            "&.cm-editor.pl-file": {
+                spellcheck: 'false',
+                "-webkit-spell-check": 'false'
             }
         });
 
@@ -53,7 +60,14 @@ export default function setupPrologEditor(plugin: Plugin) {
             "&.cm-editor.pl-file .cm-content": {
                 fontFamily: 'ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace',
                 fontSize: '14px',
-                lineHeight: '1.5'
+                lineHeight: '1.5',
+                spellcheck: 'false',
+                "-webkit-spell-check": 'false',
+                "word-spacing": "normal"
+            },
+            "&.cm-editor.pl-file": {
+                spellcheck: 'false',
+                "-webkit-spell-check": 'false'
             }
         });
         plugin.registerEditorExtension(fallbackStyle);
@@ -80,7 +94,17 @@ export default function setupPrologEditor(plugin: Plugin) {
             // Add class if it's a .pl file
             if (file.extension === 'pl') {
                 editorEl.classList.add('pl-file');
+                
+                // Also try to directly disable spellcheck on the content element
+                const contentEl = editorEl.querySelector('.cm-content');
+                if (contentEl) {
+                    contentEl.setAttribute('spellcheck', 'false');
+                    contentEl.setAttribute('data-spell-check', 'false');
+                }
             }
         })
     );
+
+    // Register extension to disable spellcheck at the editor level
+    plugin.registerEditorExtension([EditorView.contentAttributes.of({ spellcheck: 'false' })]);
 }
