@@ -2,7 +2,7 @@ import { App, Plugin, PluginSettingTab, WorkspaceLeaf,
     ItemView, TFile, Notice, Modal, setIcon, addIcon, MarkdownView} from 'obsidian';
 
     // before loading tau-prolog, force nodejs_flag to false (core.js: 4787)
-    (window as any).process = { browser: true }; 
+    (window as any).process = { browser: true };
     if(typeof process !== 'undefined') {
         (process as any).browser = true;
     }
@@ -14,8 +14,16 @@ require('jquery.terminal')($);
 require("tau-prolog/modules/js.js")(pl);
 require("tau-prolog/modules/lists.js")(pl);
 require("tau-prolog/modules/dom.js")(pl);
+require("tau-prolog/modules/charsio.js")(pl);
+require("tau-prolog/modules/concurrent.js")(pl);
+require("tau-prolog/modules/format.js")(pl);
+require("tau-prolog/modules/os.js")(pl);
+require("tau-prolog/modules/promises.js")(pl);
+require("tau-prolog/modules/random.js")(pl);
+require("tau-prolog/modules/statistics.js")(pl);
 
 import setupPrologEditor from './pObsidianEditor'
+import tObsidianPredicates from './tObsidian'
 
 interface PobsidianSettings {
     // Add your settings here
@@ -67,7 +75,6 @@ export default class PobsidianPlugin extends Plugin {
     }
 
     async editorView(){
-        //this.registerExtensions(['pl'], 'markdown');
         setupPrologEditor(this);
     }
 
@@ -110,6 +117,7 @@ export default class PobsidianPlugin extends Plugin {
             }
             return null; // Assuming this should return a Prolog null
         };
+        tObsidianPredicates(this);
     }
 
     initializeTerminal() {
@@ -128,9 +136,10 @@ export default class PobsidianPlugin extends Plugin {
                     name: 'pObsidian',
                     height: 500,
                     prompt: '?- ',
+                    copyOnSelect: true,
                     keymap: {
                         // Optional: Add Control-C as another way to trigger abort
-                        'CTRL+C': async function() {
+                        'CTRL+M': async function() {
                             await self.breakCurrentQuery();
                             return false; // Prevent default terminal behavior
                         }
@@ -165,7 +174,7 @@ export default class PobsidianPlugin extends Plugin {
                 await this.abortAll();
                 break;
             case normalizedInput.startsWith('!'):
-                // Remove the ! and wrap the rest in a shell_command/1 predicate call
+                // Remove the ! and wrap the rest in a frameworkCommand/1 predicate call
                 const command = normalizedInput.substring(1).trim();
                 await this.startNewQuery(`frameworkCommand('${command}').`);
                 break;

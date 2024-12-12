@@ -10,6 +10,15 @@ export default class TerminalView extends ItemView {
     constructor(leaf: WorkspaceLeaf) {
         super(leaf);
 		this.containerEl.addClass('pTerminal');
+        this.containerEl.addEventListener('copy', (e: ClipboardEvent) => {
+            if (window.getSelection) {
+                const selection = window.getSelection();
+                if (selection) {
+                    e.clipboardData?.setData('text/plain', selection.toString());
+                    e.preventDefault();
+                }
+            }
+        });
     }
 
     getViewType() {
